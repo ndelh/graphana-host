@@ -39,8 +39,8 @@ services:
     image: prom
     pull_policy: never
     #here only for debug
-    ports:
-      - "9090:9090"
+    expose:
+      - 9090
     #this is needed because witness is in network mode, the port exposed by node exporter isnt reachableby default.
     #we activate the host.doc... and assignate it to hast-gateway
     extra_hosts:
