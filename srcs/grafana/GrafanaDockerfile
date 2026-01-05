@@ -1,0 +1,8 @@
+FROM grafana/grafana:12.3.0
+USER root
+RUN apk add --no-cache wget
+COPY ./conf/datasource.yml /etc/grafana/provisioning/datasources/datasource.yml
+COPY ./conf/dashboard.yml /etc/grafana/provisioning/dashboards/provider.yml
+RUN wget "https://grafana.com/api/dashboards/1860/revisions/37/download" -O /etc/grafana/provisioning/dashboards/node_exporter.json
+RUN chown -R grafana /etc/grafana/provisioning
+USER grafana

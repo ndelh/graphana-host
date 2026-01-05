@@ -1,0 +1,92 @@
+services:
+
+#witness needs to be in network mode host to question the machine status
+#however we dont want this to be a breach of security so we lower the privileges to bare minimum and use no new privileges
+  witness:
+    build:
+      context: ./witness
+      dockerfile: WitnessDockerfile
+    container_name: witness
+    image: witness
+    pull_policy: never
+    network_mode: "host"
+    read_only: true
+    #for the volummes sections we mount four location of the host inside the volume in read only
+    #run is the only one mounted on his container equivalent cause their is no risk of conflict here
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /run:/run:ro
+      - /:/rootfs:ro
+    #since we diverted the place to track with node exporter in the previous section we need to tweek the CMD of the official image this is why we run node exporter with corrected path
+    command:
+      - 'usr/local/bin/node_exporter'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1000:1000"
+    restart: on-failure
+
+  prom:
+    build:
+      context: ./prom
+      dockerfile: PromDockerfile
+    container_name: prom
+    image: prom
+    pull_policy: never
+    #here only for debug
+    ports:
+      - "9090:9090"
+    #this is needed because witness is in network mode, the port exposed by node exporter isnt reachableby default.
+    #we activate the host.doc... and assignate it to hast-gateway
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - PrometheusLogs:/prometheus
+    networks:
+      - metrics
+    restart: on-failure
+
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: GrafanaDockerfile
+    container_name: Grafanahost
+    image: grafanahost
+    pull_policy: never
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/node_exporter.json
+    ports: 
+      - "3000:3000"
+    networks:
+      - metrics
+    volumes:
+      - GrafanaLogs:/var/lib/grafana
+    restart: on-failure
+
+networks:
+  metrics:
+    driver: bridge
+
+volumes:
+  
+  PrometheusLogs:
+    name: PrometheusLogs
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/trans/prom/volume/PrometheusData
+  
+  GrafanaLogs:
+    name: GraphanaLogs
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/trans/prom/volume/GrafanaData

@@ -1,0 +1,11 @@
+FROM debian:13.0
+ARG NODE_EXPORTER_VERSION=1.10.2
+ARG OS=linux
+ARG ARCH=amd64
+RUN apt update \
+	&& apt install wget -y
+RUN wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.${OS}-${ARCH}.tar.gz \
+	&& tar xvfz node_exporter-${NODE_EXPORTER_VERSION}.${OS}-${ARCH}.tar.gz \
+	&& mv node_exporter-${NODE_EXPORTER_VERSION}.${OS}-${ARCH}/node_exporter /usr/local/bin \
+	&& rm -rf node_exporter-${NODE_EXPORTER_VERSION}.${OS}-${ARCH}*
+CMD ["node_exporter"]
