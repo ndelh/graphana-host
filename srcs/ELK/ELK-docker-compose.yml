@@ -1,0 +1,14 @@
+Services:
+
+  filebeat:
+    container_name: filebeat
+    build:
+      context: ./filebeat
+      dockerfile: filebeat-dockerfile
+    image: filebeat
+    pull_policy: never
+    networks:
+      - ELK-networks
+
+networks:
+

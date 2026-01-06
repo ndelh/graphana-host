@@ -24,6 +24,7 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
+      - '--collector.processes'
     cap_drop:
       - ALL
     security_opt:
@@ -81,7 +82,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/trans/prom/volume/PrometheusData
+      device: /home/trans/prom/volume/graf/PrometheusData
   
   GrafanaLogs:
     name: GraphanaLogs
@@ -89,4 +90,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/trans/prom/volume/GrafanaData
+      device: /home/trans/prom/volume/graf/GrafanaData
