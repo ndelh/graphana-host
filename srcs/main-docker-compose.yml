@@ -1,2 +1,3 @@
 include:
+  - path: ./ELK/ELK-docker-compose.yml
   - path: ./graf/graf-docker-compose.yml

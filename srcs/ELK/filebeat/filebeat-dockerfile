@@ -1,0 +1,4 @@
+FROM elastic/filebeat:8.19.9
+USER root 
+COPY ./conf/filebeat.yml /usr/share/filebeat/filebeat.yml
+RUN  chown root:filebeat /usr/share/filebeat/filebeat.yml && chmod go-w /usr/share/filebeat/filebeat.yml

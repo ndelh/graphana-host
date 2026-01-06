@@ -2,7 +2,7 @@ VolumePath= /home/trans/prom/volume
 DockerCompose = ./srcs/main-docker-compose.yml
 
 up: create
-	docker compose -f $(DockerCompose) up -d  
+	docker compose -f $(DockerCompose) up  
 down:
 	@docker compose -f $(DockerCompose) down -v
 clean:
@@ -12,9 +12,11 @@ fclean: down destroy clean
 create:
 	@if [ ! -d $(VolumePath) ]; then \
 		mkdir $(VolumePath) ;\
-		mkdir $(VolumePath)/graf \
+		mkdir $(VolumePath)/graf; \
 		mkdir $(VolumePath)/graf/PrometheusData; \
 		mkdir $(VolumePath)/graf/GrafanaData; \
+		mkdir $(VolumePath)/ELK; \
+		mkdir $(VolumePath)/ELK/fb_data; \
 	fi
 
 destroy:

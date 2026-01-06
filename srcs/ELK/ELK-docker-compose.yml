@@ -1,14 +1,35 @@
-Services:
+services:
 
   filebeat:
     container_name: filebeat
+    #we need to be in root to access the docker socket and communicate throught it
+    user: root
     build:
       context: ./filebeat
       dockerfile: filebeat-dockerfile
     image: filebeat
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - fb_volume:/usr/share/filebeat/data
     pull_policy: never
     networks:
       - ELK-networks
-
+    healthcheck:
+      test: ["CMD", "filebeat", "test", "config"]
+      interval: 30s
+      retries: 3
+      timeout: 10s
+      start_period: 10s
 networks:
+  ELK-networks:
+    driver: bridge
+
+volumes:
+  fb_volume:
+    name: fb_volume
+    driver_opts:
+      type: none
+      o : bind
+      device: /home/trans/prom/volume/ELK/fb_data
 
