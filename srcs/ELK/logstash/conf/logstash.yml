@@ -1,0 +1,9 @@
+host: "0.0.0.0"
+pipeline.workers: 2
+pipeline.batch.size: 250
+pipeline.batch.delay: 1000
+queue.type: persisted
+queue.max_bytes: 512mb
+monitoring.enabled: false
+xpack.monitoring.enabled: false
+log.level: info

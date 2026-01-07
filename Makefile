@@ -17,6 +17,7 @@ create:
 		mkdir $(VolumePath)/graf/GrafanaData; \
 		mkdir $(VolumePath)/ELK; \
 		mkdir $(VolumePath)/ELK/fb_data; \
+		mkdir $(VolumePath)/ELK/logstash_queue; \
 	fi
 
 destroy:
