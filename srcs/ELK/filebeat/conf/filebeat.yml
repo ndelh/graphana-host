@@ -15,5 +15,5 @@ processors:
   - add_docker_metadata:
       host: "unix:///var/run/docker.sock"
 
-output.console:
-  pretty: true
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]

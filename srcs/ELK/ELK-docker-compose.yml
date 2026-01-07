@@ -8,11 +8,11 @@ services:
       context: ./filebeat
       dockerfile: filebeat-dockerfile
     image: filebeat
+    pull_policy: never
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - fb_volume:/usr/share/filebeat/data
-    pull_policy: never
     networks:
       - ELK-networks
     healthcheck:
@@ -21,6 +21,26 @@ services:
       retries: 3
       timeout: 10s
       start_period: 10s
+
+  elasticsearch:
+    container_name: elasticsearch
+    build:
+      context : ./elasticsearch
+      dockerfile: elasticsearch-dockerfile
+    image: elasticsearch
+    pull_policy: never
+    environment:
+      - discovery.type=single.node
+      - xpack.security.enabled=false #(will be switched to true for https)
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" #ram limitations for the java process
+    networks:
+      - ELK-networks
+    expose:
+      - 9200
+    deploy:
+     resources:
+      limits:
+        memory: 1gb #ram limitations for the whole container
 networks:
   ELK-networks:
     driver: bridge
@@ -32,4 +52,3 @@ volumes:
       type: none
       o : bind
       device: /home/trans/prom/volume/ELK/fb_data
-
