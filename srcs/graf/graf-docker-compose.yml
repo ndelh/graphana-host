@@ -50,9 +50,6 @@ services:
       - PrometheusLogs:/prometheus
     networks:
       - metrics
-    depends_on:
-      filebeat:
-        condition: service_healthy
     restart: on-failure
 
   grafana:

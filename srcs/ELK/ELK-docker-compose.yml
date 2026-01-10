@@ -15,12 +15,9 @@ services:
       - fb_volume:/usr/share/filebeat/data
     networks:
       - ELK-networks
-    healthcheck:
-      test: ["CMD", "filebeat", "test", "config"]
-      interval: 30s
-      retries: 3
-      timeout: 10s
-      start_period: 10s
+    depends_on:
+      logstash:
+        condition: service_healthy
 
   logstash:
     container_name: logstash
@@ -37,9 +34,16 @@ services:
       - ELK-networks
     expose:
       - 5044
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9600/_node/stats/pipelines | grep -q '\"main\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
-      filebeat:
+      elasticsearch:
         condition: service_healthy
+
 
   elasticsearch:
     container_name: elasticsearch
@@ -49,9 +53,12 @@ services:
     image: elasticsearch
     pull_policy: never
     environment:
-      - discovery.type=single.node
+      - discovery.type=single-node
       - xpack.security.enabled=false #(will be switched to true for https)
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m" #ram limitations for the java process
+    volumes:
+      - els_logs:/usr/share/elasticsearch/logs # temporary here for logs
+      - els_data:/usr/share/elasticsearch/data
     networks:
       - ELK-networks
     expose:
@@ -60,6 +67,12 @@ services:
      resources:
       limits:
         memory: 1gb #ram limitations for the whole container
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cat/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 networks:
   ELK-networks:
     driver: bridge
@@ -77,3 +90,15 @@ volumes:
       type: none
       o: bind
       device: /home/trans/prom/volume/ELK/logstash_queue
+  els_logs:
+    name: els_logs
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/trans/prom/volume/ELK/els_logs
+  els_data:
+    name: els_data
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/trans/prom/volume/ELK/els_data
