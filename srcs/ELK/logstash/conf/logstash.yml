@@ -1,7 +1,7 @@
 host: "0.0.0.0"
 pipeline.workers: 2
-pipeline.batch.size: 250
-pipeline.batch.delay: 1000
+pipeline.batch.size: 50
+pipeline.batch.delay: 50 
 queue.type: persisted
 queue.max_bytes: 512mb
 monitoring.enabled: false

@@ -28,7 +28,6 @@ services:
     pull_policy: never
     environment:
       - "LS_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - "log.level=debug"
       - "queue.type=persisted"
       - "path.queue=/usr/share/logstash/data/queue"
     volumes:
