@@ -3,7 +3,7 @@ pipeline.workers: 2
 pipeline.batch.size: 50
 pipeline.batch.delay: 50 
 queue.type: persisted
-queue.max_bytes: 512mb
+queue.max_bytes: 1024mb
 monitoring.enabled: false
 xpack.monitoring.enabled: false
 log.level: info
