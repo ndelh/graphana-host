@@ -1,5 +1,16 @@
 services:
 
+  https_setuper:
+    container_name: https_setuper
+    build:
+      context: ./https_setuper
+      dockerfile: https_setuper-dockerfile
+    image: https_setuper
+    pull_policy: never
+    user: "0"
+    volumes: 
+      - /home/trans/prom/volume/ELK/certs:/usr/share/elasticsearch/config/certs
+
   filebeat:
     container_name: filebeat
     #we need to be in root to access the docker socket and communicate throught it
@@ -13,6 +24,8 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - fb_volume:/usr/share/filebeat/data
+      - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/filebeat/config/certs/ca.crt:ro
+      - /home/trans/prom/volume/ELK/certs/filebeat:/usr/share/filebeat/config/certs/filebeat:ro
     networks:
       - ELK-networks
     depends_on:
@@ -32,12 +45,14 @@ services:
       - "path.queue=/usr/share/logstash/data/queue"
     volumes:
       - logstash_queue:/usr/share/logstash/data
+      - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/logstash/config/certs/ca.crt:ro
+      - /home/trans/prom/volume/ELK/certs/logstash:/usr/share/logstash/config/certs/logstash:ro
     networks:
       - ELK-networks
     expose:
       - 5044
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9600/_node/stats/pipelines | grep -q '\"main\"'"]
+      test: ["CMD-SHELL", "curl -s http://localhost:9600/_node/stats/pipelines | grep -q '\"transcendence_ELK\"'"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -67,8 +82,9 @@ services:
       - xpack.security.enabled=false #(will be switched to true for https)
       - "ES_JAVA_OPTS=-Xms3000m -Xmx3000m" #ram limitations for the java process
     volumes:
-      - els_logs:/usr/share/elasticsearch/logs # temporary here for logs
       - els_data:/usr/share/elasticsearch/data
+      - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/elasticsearch/config/certs/ca.crt:ro
+      - /home/trans/prom/volume/ELK/certs/elasticsearch/:/usr/share/elasticsearch/config/certs/elasticsearch:ro
     networks:
       - ELK-networks
     expose:
@@ -82,6 +98,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 30s
+    depends_on:
+      https_setuper:
+        condition: service_completed_successfully
+
+  kibana:
+    container_name: kibana
+    build:
+      context: ./kibana
+      dockerfile: kibana-dockerfile
+    image: kibana
+    pull_policy: never
+    networks:
+      - ELK-networks
+    ports:
+      - "5601:5601"
+    environment:
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+    volumes:
+      - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/kibana/config/certs/ca.crt:ro
+      - /home/trans/prom/volume/ELK/certs/kibana:/usr/share/kibana/config/certs/kibana:ro
+
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
 networks:
   ELK-networks:
