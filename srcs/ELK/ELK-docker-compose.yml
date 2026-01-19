@@ -10,6 +10,26 @@ services:
     user: "0"
     volumes: 
       - /home/trans/prom/volume/ELK/certs:/usr/share/elasticsearch/config/certs
+  
+  password_setuper:
+    container_name: password_setuper
+    build:
+      context: ./password_setuper
+      dockerfile: password_setuper-dockerfile
+    image: password_setuper
+    pull_policy: never
+    environment:
+      - MAX_RETRIES=5
+      - ELS_PASS=${ELS_PASS}
+      - LOGSTASH_PASS=${LOGSTASH_PASS}
+      - KIBANA_PASS=${KIBANA_PASS}
+    volumes:
+      - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/elasticsearch/config/certs/ca.crt:ro
+    networks:
+      - ELK-networks
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
   filebeat:
     container_name: filebeat
@@ -58,8 +78,8 @@ services:
       retries: 5
       start_period: 30s
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      password_setuper:
+        condition: service_completed_successfully
     deploy:
       resources:
         limits:
@@ -79,7 +99,7 @@ services:
     pull_policy: never
     environment:
       - xpack.security.autoconfiguration.enabled=false
-      - ELASTIC_PASSWORD=pass
+      - ELASTIC_PASSWORD=${ELS_PASS}
       - "ES_JAVA_OPTS=-Xms3000m -Xmx3000m" #ram limitations for the java process
     volumes:
       - els_data:/usr/share/elasticsearch/data
@@ -115,14 +135,15 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+      - "ELASTICSEARCH_HOSTS=https://elasticsearch:9200"
+      - xpack.security.autoconfiguration.enabled=false
+      - KIBANA_PASS=${KIBANA_PASS}
     volumes:
       - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/kibana/config/certs/ca.crt:ro
       - /home/trans/prom/volume/ELK/certs/kibana:/usr/share/kibana/config/certs/kibana:ro
-
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      password_setuper:
+        condition: service_completed_successfully
 
 networks:
   ELK-networks:
@@ -141,12 +162,6 @@ volumes:
       type: none
       o: bind
       device: /home/trans/prom/volume/ELK/logstash_queue
-  els_logs:
-    name: els_logs
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/trans/prom/volume/ELK/els_logs
   els_data:
     name: els_data
     driver_opts:
