@@ -1,1 +1,6 @@
 FROM elasticsearch:8.19.9
+
+RUN rm -f /usr/share/elasticsearch/config/elasticsearch.yml
+COPY --chown=elasticsearch:0 ./conf/elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
+
+RUN chmod 0660 /usr/share/elasticsearch/config/elasticsearch.yml

@@ -35,4 +35,3 @@ fi
 	chown -R 1000:0 "$OUTPUT_DIR"
 	find "$OUTPUT_DIR" -type d -exec chmod 755 {} +
 	find "$OUTPUT_DIR" -type f -exec chmod 644 {} +
-	sleep 3;

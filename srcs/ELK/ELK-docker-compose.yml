@@ -78,8 +78,8 @@ services:
     image: elasticsearch
     pull_policy: never
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false #(will be switched to true for https)
+      - xpack.security.autoconfiguration.enabled=false
+      - ELASTIC_PASSWORD=pass
       - "ES_JAVA_OPTS=-Xms3000m -Xmx3000m" #ram limitations for the java process
     volumes:
       - els_data:/usr/share/elasticsearch/data
@@ -94,7 +94,7 @@ services:
       limits:
         memory: 3500mb #ram limitations for the whole container
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cat/health"]
+      test: ["CMD-SHELL", "curl -s --cacert /usr/share/elasticsearch/config/certs/ca.crt -u elastic:${ELS_PASS} https://localhost:9200/_cat/health?v | grep -q 'green\\|yellow'"]
       interval: 10s
       timeout: 5s
       retries: 3
