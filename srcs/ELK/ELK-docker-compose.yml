@@ -61,8 +61,7 @@ services:
     pull_policy: never
     environment:
       - "LS_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - "queue.type=persisted"
-      - "path.queue=/usr/share/logstash/data/queue"
+      - LOGSTASH_PASSWORD=${ELS_PASS}
     volumes:
       - logstash_queue:/usr/share/logstash/data
       - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/logstash/config/certs/ca.crt:ro

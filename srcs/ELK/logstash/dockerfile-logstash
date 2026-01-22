@@ -1,3 +1,7 @@
 FROM logstash:8.19.9
-COPY ./conf/pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
-COPY ./conf/pipelines.yml /usr/share/logstash/config/pipelines.yml
+USER root
+COPY --chown=logstash:logstash ./conf/logstash.yml /usr/share/logstash/config/logstash.yml
+COPY --chown=logstash:logstash ./conf/pipelines.yml /usr/share/logstash/config/pipelines.yml
+COPY --chown=logstash:logstash ./conf/pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+
+USER logstash

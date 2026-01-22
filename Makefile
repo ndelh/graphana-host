@@ -4,12 +4,11 @@ DockerCompose = ./srcs/main-docker-compose.yml
 up: create
 	docker compose -f $(DockerCompose) up -d
 down:
-	@docker compose -f $(DockerCompose) down 
+	@docker compose -f $(DockerCompose) down -v 
 clean:
 	@docker system prune -af >/dev/null
 
-fclean: destroy clean
-	@docker compose -f$(DockerCompose) down -v
+fclean: down destroy clean
 create:
 	@if [ ! -d $(VolumePath) ]; then \
 		mkdir $(VolumePath) ;\

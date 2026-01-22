@@ -1,9 +1,11 @@
-host: "0.0.0.0"
+http.host: "0.0.0.0"
+node.name: "transcendence"
 pipeline.workers: 2
 pipeline.batch.size: 50
 pipeline.batch.delay: 50 
 queue.type: persisted
 queue.max_bytes: 1024mb
+path.queue: "/usr/share/logstash/data/queue"
 monitoring.enabled: false
 xpack.monitoring.enabled: false
 log.level: info
