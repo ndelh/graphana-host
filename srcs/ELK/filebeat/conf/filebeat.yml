@@ -17,3 +17,6 @@ processors:
 
 output.logstash:
   hosts: ["logstash:5044"]
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/usr/share/filebeat/config/certs/ca.crt"]
+  ssl.verification.mode: certificate

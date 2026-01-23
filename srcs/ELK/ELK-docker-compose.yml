@@ -7,6 +7,8 @@ services:
       dockerfile: https_setuper-dockerfile
     image: https_setuper
     pull_policy: never
+    environment:
+      - PKCS12_PASS=${PKCS12_PASS}
     user: "0"
     volumes: 
       - /home/trans/prom/volume/ELK/certs:/usr/share/elasticsearch/config/certs
@@ -62,6 +64,8 @@ services:
     environment:
       - "LS_JAVA_OPTS=-Xms1024m -Xmx1024m"
       - LOGSTASH_PASSWORD=${ELS_PASS}
+      - PKCS12_PASS=${PKCS12_PASS}
+      - LOGSTASH_PASS=${LOGSTASH_PASS}
     volumes:
       - logstash_queue:/usr/share/logstash/data
       - /home/trans/prom/volume/ELK/certs/ca/ca.crt:/usr/share/logstash/config/certs/ca.crt:ro
@@ -71,7 +75,7 @@ services:
     expose:
       - 5044
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9600/_node/stats/pipelines | grep -q '\"transcendence_ELK\"'"]
+      test: ["CMD-SHELL", "curl -s -k https://localhost:9600/_node/stats/pipelines | grep -q '\"transcendence_ELK\"'"]
       interval: 15s
       timeout: 5s
       retries: 5

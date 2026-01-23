@@ -1,11 +1,23 @@
 http.host: "0.0.0.0"
 node.name: "transcendence"
+
+#secure the api
+api.ssl.enabled: true
+api.ssl.keystore.path: "/usr/share/logstash/config/certs/logstash/logstash.p12"
+api.ssl.keystore.password: "${PKCS12_PASS}"
+
+#internal monitoring
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["https://elasticsearch:9200"]
+xpack.monitoring.elasticsearch.username: "logstash_system"
+xpack.monitoring.elasticsearch.password: "${LOGSTASH_PASS}"
+xpack.monitoring.elasticsearch.ssl.certificate_authority: "/usr/share/logstash/config/certs/ca.crt"
+
+#performance 
 pipeline.workers: 2
 pipeline.batch.size: 50
 pipeline.batch.delay: 50 
 queue.type: persisted
 queue.max_bytes: 1024mb
 path.queue: "/usr/share/logstash/data/queue"
-monitoring.enabled: false
-xpack.monitoring.enabled: false
 log.level: info

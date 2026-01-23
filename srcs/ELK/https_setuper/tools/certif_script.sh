@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+echo "$PKCS12_PASS"
 OUTPUT_DIR="/usr/share/elasticsearch/config/certs"
 
 if [ ! -f ${OUTPUT_DIR}/ca.crt ]; then
@@ -28,8 +29,15 @@ EOF
 	unzip "$OUTPUT_DIR/certs.zip" -d "$OUTPUT_DIR"
 	openssl pkcs8 -inform PEM -in "$OUTPUT_DIR/logstash/logstash.key" \
     -topk8 -nocrypt -out "$OUTPUT_DIR/logstash/logstash.pkcs8.key"
-	rm "$OUTPUT_DIR/certs.zip" "$OUTPUT_DIR/instances.yml"
+	rm "$OUTPUT_DIR/certs.zip" "$OUTPUT_DIR/instances.yml" 
 	echo "certificates successfully generated"
+	openssl pkcs12 -export \
+	-in "$OUTPUT_DIR/logstash/logstash.crt" \
+	-inkey "$OUTPUT_DIR/logstash/logstash.pkcs8.key" \
+	-out "$OUTPUT_DIR/logstash/logstash.p12" \
+	-name logstash \
+	-passout pass:"$PKCS12_PASS" \
+	-CAfile "$OUTPUT_DIR/ca/ca.crt" -caname root
 fi
 	echo "changing file properties"
 	chown -R 1000:0 "$OUTPUT_DIR"
